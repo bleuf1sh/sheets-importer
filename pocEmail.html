@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+</head>
+
+<body>
+  <div>HELLO</div>
+  <script>
+    const gCode = `
+    return Session.getActiveUser().getEmail();
+    `;
+    google.script.run.withSuccessHandler((resp) => {
+      document.querySelector(`div`).textContent = `RESP IS:${resp}`;
+    }).extExecuteSync(gCode);
+  </script>
+</body>
+
+</html>

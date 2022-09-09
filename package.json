@@ -1,0 +1,22 @@
+{
+  "name": "sheets-importer",
+  "version": "1.0.0",
+  "description": "d",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://bleuf1sh@github.com/bleuf1sh/sheets-importer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bleuf1sh/sheets-importer/issues"
+  },
+  "homepage": "https://github.com/bleuf1sh/sheets-importer#readme",
+  "dependencies": {
+    "@types/google-apps-script": "^1.0.53"
+  }
+}

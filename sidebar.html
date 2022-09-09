@@ -1,24 +1,92 @@
 <!DOCTYPE html>
 <html>
 
-  <head>
-    <base target="_top">
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-  </head>
+<head>
+  <base target="_top">
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <!-- <script src="https://bleuf1sh.github.io/sheets-importer/sidebar.ts"></script> -->
+</head>
 
-  <body>
+<body>
+  <button>test</button>
+  <input class="file" type="file">
+  <p>
+    <span>Sheet:</span>
+    <select class="sheetNames"></select>
+  </p>
+  <p>
+    <span>Rows to Skip:</span>
+    <input class="rowsToSkip" type="number" min="0" max="20" value="0"></input>
+  </p>
+  <div class="output"></div>
 
-    <input class="file" type="file">
-    <p>
-      <span>Sheet:</span>
-      <select class="sheetNames"></select>
-    </p>
-    <p>
-      <span>Rows to Skip:</span>
-      <input class="rowsToSkip" type="number" min="0" max="20" value="0"></input>
-    </p>
-    <div class="output"></div>
 
-  </body>
+  <script>
+    const buttonEl = document.querySelector(`button`);
+    const fileInputEl = document.querySelector(`input.file`);
+    const sheetNamesEl = document.querySelector(`.sheetNames`);
+    const rowsToSkipInputEl = document.querySelector(`input.rowsToSkip`);
+    const outputEl = document.querySelector(`.output`);
+
+    let uploadedSheetNames = [];
+    let gSheetHeaders = [];
+
+    function populateSheetNames() {
+      while (sheetNamesEl.firstChild) {
+        sheetNamesEl.removeChild(sheetNamesEl.firstChild);
+      }
+      uploadedSheetNames.forEach((n) => {
+        const optEl = document.createElement('option');
+        optEl.textContent = n;
+        sheetNamesEl.appendChild(optEl);
+      });
+    }
+
+    async function convertFileSheetToJson(f, rowsToSkip) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const data = reader.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          uploadedSheetNames = workbook.SheetNames;
+          const sheet = workbook.Sheets[sheetNamesEl.value || uploadedSheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { range: rowsToSkip });
+          resolve(jsonData);
+        }
+        reader.readAsBinaryString(f);
+      });
+    }
+
+    async function reRun() {
+      const selectedFile = fileInputEl.files[0];
+      console.log(selectedFile);
+
+      const json = await convertFileSheetToJson(selectedFile, Number(rowsToSkipInputEl.value));
+      outputEl.innerText = JSON.stringify(json, undefined, 4);
+
+      google.script.run.withSuccessHandler((headers) => {
+        gSheetHeaders = headers;
+        outputEl.innerText = `gSheetHeaders: ${JSON.stringify(gSheetHeaders)}\n\n${outputEl.innerText}`;
+      }).extGetSheetHeaders(gCode);
+    }
+
+    fileInputEl.onchange = async () => {
+      await reRun();
+      populateSheetNames();
+    }
+    sheetNamesEl.onchange = async () => { await reRun(); }
+    rowsToSkipInputEl.onchange = async () => { await reRun(); }
+
+    buttonEl.onclick = async() => {
+      google.script.run.withSuccessHandler((headers) => {
+        gSheetHeaders = headers;
+        outputEl.innerText = `gSheetHeaders: ${JSON.stringify(gSheetHeaders)}\n\n${outputEl.innerText}`;
+      }).extExecute(gCode);
+    }
+
+  </script>
+
+
+</body>
 
 </html>
